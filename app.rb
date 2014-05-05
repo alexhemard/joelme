@@ -24,7 +24,7 @@ module JoelMe
       count = params[:count].to_i || 5
       count = 5 if count < 1
 
-      joels = Joel.limit(count)
+      joels = Joel.order(Sequel.lit('RANDOM()')).limit(count)
       json joels: joels.collect(&:url)
     end
 
