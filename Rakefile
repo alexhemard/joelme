@@ -1,3 +1,7 @@
+task :console do
+  exec "irb -r bundler/setup -r ./app"
+end
+
 namespace :db do
   require "sequel"
   namespace :migrate do

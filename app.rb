@@ -3,9 +3,16 @@ require "sinatra/json"
 require "sequel"
 
 DB = Sequel.connect(ENV['DATABASE_URL'] || "postgres://localhost/joeldb")
+DB.extension :pg_array
 
 module JoelMe
-  class Joel < Sequel::Model; end
+  class Joel < Sequel::Model
+    def before_save
+      self.tags ||= Sequel.pg_array([])
+      self.tags = self.tags.collect {|t| t.to_s.downcase.strip}.uniq
+      super
+    end
+  end
 
   class App < ::Sinatra::Base
     get '/' do
@@ -26,6 +33,14 @@ module JoelMe
 
       joels = Joel.order(Sequel.lit('RANDOM()')).limit(count)
       json joels: joels.collect(&:url)
+    end
+
+    get '/:name' do
+      joel = Joel.where("? = ANY (tags)", params[:name]).first
+
+      return 404 unless joel
+
+      json joel: joel.url
     end
 
     get '/count' do
