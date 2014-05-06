@@ -35,17 +35,17 @@ module JoelMe
       json joels: joels.collect(&:url)
     end
 
+    get '/count' do
+      count = Joel.count
+      json joel_count: count
+    end
+
     get '/:name' do
       joel = Joel.where("? = ANY (tags)", params[:name]).first
 
       return 404 unless joel
 
       json joel: joel.url
-    end
-
-    get '/count' do
-      count = Joel.count
-      json joel_count: count
     end
   end
 end
